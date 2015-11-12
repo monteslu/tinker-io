@@ -1,0 +1,31 @@
+{
+  "name": "tinker-io",
+  "version": "1.0.0",
+  "description": "simple tinker based IO class for the particle cloud ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/monteslu/tinker-io.git"
+  },
+  "keywords": [
+    "johnny-five",
+    "nodebots",
+    "particle",
+    "spark",
+    "core",
+    "photon"
+  ],
+  "author": "Luis Montes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/monteslu/tinker-io/issues"
+  },
+  "homepage": "https://github.com/monteslu/tinker-io#readme",
+  "dependencies": {
+    "board-io": "^3.0.4",
+    "rest": "^1.3.1"
+  }
+}
