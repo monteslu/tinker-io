@@ -4,7 +4,7 @@ Tinker-io is a Firmata-compatibility IO class for writing node programs that int
 
 ### Caveat
 
-This is a very simplified IO class.  It is meant to be used over the particle cloud using the default Tinker sketch that ships on the device.  It currently only supports outputting values to pins.
+This is a very simplified IO class.  It is meant to be used over the particle cloud using the default Tinker sketch that ships on the device. 
 
 For a full-featured IO class you should be using [particle-io](https://github.com/rwaldron/particle-io)
 
@@ -36,6 +36,16 @@ board.on("ready", function() {
   setInterval(function() {
     this.digitalWrite("D7", (byte ^= 1));
   }.bind(this), 500);
+
+  this.pinMode("A1", five.Pin.ANALOG);
+  this.analogRead("A1", function(voltage) {
+    console.log("analog read", voltage);
+  });
+
+  this.pinMode("D1", five.Pin.INPUT);
+  this.digitalRead("D1", function(value) {
+    console.log('digital read', value);
+  });
 });
 ```
 
@@ -56,6 +66,7 @@ var board = new five.Board({
 board.on("ready", function() {
   var led = new five.Led("D7");
   led.blink();
+
+
 });
 ```
-

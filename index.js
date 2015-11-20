@@ -200,6 +200,46 @@ TinkerIO.prototype.analogWrite = function(pin, value) {
 };
 
 
+TinkerIO.prototype.analogRead = function(pin, callback) {
+
+  var opts = {
+    path: 'analogread?access_token=' + this.options.token,
+    method: 'POST',
+    entity: {
+      params: pin
+    }
+  };
+
+  this.restClient(opts)
+    .then(function(ok){
+     callback(ok.entity.return_value);
+    }, function(err){
+      console.log('read err', err);
+    });
+
+};
+
+TinkerIO.prototype.digitalRead = function(pin, callback) {
+
+
+  var opts = {
+    path: 'digitalread?access_token=' + this.options.token,
+    method: 'POST',
+    entity: {
+      params: pin
+    }
+  };
+
+  this.restClient(opts)
+    .then(function(ok){
+     callback(ok.entity.return_value);
+    }, function(err){
+      console.log('read err', err);
+    });
+
+};
+
+
+
 
 module.exports = TinkerIO;
-
