@@ -2,12 +2,11 @@
 
 var util = require('util');
 var BoardIO = require('board-io');
-var rest = require('rest');
-var pathPrefixInterceptor = require('rest/interceptor/pathPrefix');
-var mimeInterceptor = require('rest/interceptor/mime');
-var errorCodeInterceptor = require('rest/interceptor/errorCode');
+var spark = require('spark');
 
 var priv = new Map();
+
+var id;
 
 var modes = {
   INPUT: 0,
@@ -18,27 +17,27 @@ var modes = {
 };
 
 var pins = [
-    { id: "D0", modes: [0, 1, 3, 4] },
-    { id: "D1", modes: [0, 1, 3, 4] },
-    { id: "D2", modes: [0, 1, 3, 4] },
-    { id: "D3", modes: [0, 1, 3, 4] },
-    { id: "D4", modes: [0, 1] },
-    { id: "D5", modes: [0, 1] },
-    { id: "D6", modes: [0, 1] },
-    { id: "D7", modes: [0, 1] },
+  { id: "D0", modes: [0, 1, 3, 4] },
+  { id: "D1", modes: [0, 1, 3, 4] },
+  { id: "D2", modes: [0, 1, 3, 4] },
+  { id: "D3", modes: [0, 1, 3, 4] },
+  { id: "D4", modes: [0, 1] },
+  { id: "D5", modes: [0, 1] },
+  { id: "D6", modes: [0, 1] },
+  { id: "D7", modes: [0, 1] },
 
-    { id: "", modes: [] },
-    { id: "", modes: [] },
+  { id: "", modes: [] },
+  { id: "", modes: [] },
 
-    { id: "A0", modes: [0, 1, 2, 3, 4] },
-    { id: "A1", modes: [0, 1, 2, 3, 4] },
-    { id: "A2", modes: [0, 1, 2] },
-    { id: "A3", modes: [0, 1, 2] },
-    { id: "A4", modes: [0, 1, 2, 3, 4] },
-    { id: "A5", modes: [0, 1, 2, 3, 4] },
-    { id: "A6", modes: [0, 1, 2, 3, 4] },
-    { id: "A7", modes: [0, 1, 2, 3, 4] }
-  ];
+  { id: "A0", modes: [0, 1, 2, 3, 4] },
+  { id: "A1", modes: [0, 1, 2, 3, 4] },
+  { id: "A2", modes: [0, 1, 2] },
+  { id: "A3", modes: [0, 1, 2] },
+  { id: "A4", modes: [0, 1, 2, 3, 4] },
+  { id: "A5", modes: [0, 1, 2, 3, 4] },
+  { id: "A6", modes: [0, 1, 2, 3, 4] },
+  { id: "A7", modes: [0, 1, 2, 3, 4] }
+];
 
 function TinkerIO(options) {
 
@@ -51,39 +50,66 @@ function TinkerIO(options) {
   self.HIGH = 1;
   self.options = options || {};
 
-  self.restClient = rest.wrap(pathPrefixInterceptor, { prefix: 'https://api.particle.io/v1/devices/' + self.options.deviceId + '/'})
-      .wrap(mimeInterceptor, { mime: 'application/json' })
-      .wrap(errorCodeInterceptor);
+  if (options.deviceName && options.token){
+     setupSpark(options, function(data){
+       id = data;
+     });
+   }
 
-  // connect to hardware and emit "connected" event
   process.nextTick(function(){
-    self.emit("connected");
+    self.emit("connected", id);
   });
 
+    this.pins = pins.map(function(pin) {
+      return {
+        name: pin.id,
+        supportedModes: pin.modes,
+        mode: pin.modes[0],
+        value: 0
+      };
+    });
 
-  // .. configure pins
-  this.pins = pins.map(function(pin) {
-    return {
-      name: pin.id,
-      supportedModes: pin.modes,
-      mode: pin.modes[0],
-      value: 0
-    };
-  });
+    self.analogPins = this.pins.slice(10).map(function(pin, i) {
+      return i;
+    });
 
-  self.analogPins = this.pins.slice(10).map(function(pin, i) {
-    return i;
-  });
+      // all done, emit ready event
+      process.nextTick(function(){
+        self.emit("ready");
+      });
 
-  // all done, emit ready event
-  process.nextTick(function(){
-    self.emit("ready");
-  });
-
-  self.isReady = true;
+     self.isReady = true;
 
 };
+
 util.inherits(TinkerIO, BoardIO);
+
+function setupSpark(options, callback){
+  spark.login({accessToken: options.token});
+
+  spark.listDevices(function(err, devices) {
+
+    var device = searchDevice(devices, options.deviceName);
+    device.getAttributes(function(err, data) {
+      console.log('Device Name:', data.name);
+      console.log('Device ID', data.id);
+      id = data.id;
+      callback(id);
+    });
+  });
+};
+
+function searchDevice(devices, deviceName){
+  var foundDevice;
+  devices.forEach(function(device) {
+    if (device.name == deviceName){
+      console.log("Found Device!");
+      foundDevice = device;
+    }
+  });
+  return foundDevice;
+}
+
 
 function namePin(pin, prefix){
   pin = new String(pin);
@@ -151,20 +177,12 @@ TinkerIO.prototype.digitalWrite = function(pin, value) {
     this.pins[pinInt].value = 0;
   }
 
-  var opts = {
-    path: 'digitalwrite?access_token=' + this.options.token,
-    method: 'POST',
-    entity: {
-      params: pin + ',' + value
+  spark.callFunction(id, 'digitalwrite', pin +':' + value, function(err, data) {
+    if (err) {
+      console.log('An error occurred:', err);
     }
-  };
+  });
 
-  this.restClient(opts)
-    .then(function(ok){
-      // console.log('digitalwrite ok', ok.entity);
-    }, function(err){
-      console.log('digitalwrite err', err);
-    });
 };
 
 TinkerIO.prototype.servoWrite = function(pin, value) {
@@ -183,59 +201,36 @@ TinkerIO.prototype.analogWrite = function(pin, value) {
 
   this.pins[pinInt].value = value;
 
-  var opts = {
-    path: 'analogwrite?access_token=' + this.options.token,
-    method: 'POST',
-    entity: {
-      params: pin + ',' + value
+  spark.callFunction(id, 'analogWrite', pin +':' + value, function(err, data) {
+    if (err) {
+      console.log('An error occurred:', err);
     }
-  };
-
-  this.restClient(opts)
-    .then(function(ok){
-      // console.log('analogwrite ok', ok.entity);
-    }, function(err){
-      console.log('analogwrite err', err);
-    });
+  });
 };
 
 
 TinkerIO.prototype.analogRead = function(pin, callback) {
 
-  var opts = {
-    path: 'analogread?access_token=' + this.options.token,
-    method: 'POST',
-    entity: {
-      params: pin
+  spark.callFunction(id, 'analogread', pin, function(err, data) {
+    if (err) {
+      console.log('An error occurred:', err);
+    }else {
+      callback(data.return_value);
     }
-  };
-
-  this.restClient(opts)
-    .then(function(ok){
-     callback(ok.entity.return_value);
-    }, function(err){
-      console.log('read err', err);
-    });
+  });
 
 };
 
 TinkerIO.prototype.digitalRead = function(pin, callback) {
 
 
-  var opts = {
-    path: 'digitalread?access_token=' + this.options.token,
-    method: 'POST',
-    entity: {
-      params: pin
+  spark.callFunction(id, 'digitalread', pin, function(err, data) {
+    if (err) {
+      console.log('An error occurred:', err);
+    }else {
+      callback(data.return_value);
     }
-  };
-
-  this.restClient(opts)
-    .then(function(ok){
-     callback(ok.entity.return_value);
-    }, function(err){
-      console.log('read err', err);
-    });
+  });
 
 };
 
