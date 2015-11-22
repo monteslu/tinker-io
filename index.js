@@ -60,12 +60,10 @@ function TinkerIO(options) {
     return i;
   });
 
-  if (options.deviceName && options.token){
-    setupSpark(options, function(data){
-      id = data;
-      setImmediate();
-    });
-  }
+  setupSpark(options, function(data){
+    id = data;
+    setImmediate();
+  });
 
   function setImmediate() {
     self.emit("connect");
@@ -79,22 +77,34 @@ util.inherits(TinkerIO, BoardIO);
 
 function setupSpark(options, callback){
 
+  var credentials;
+
   if (options.username){
-    spark.login({username: options.username, password: options.password});
+    credentials = {username: options.username, password: options.password};
   }else if(options.token){
-    spark.login({accessToken: options.token});
+    credentials = {accessToken: options.token};
   }
 
-  spark.listDevices(function(err, devices) {
+  spark.login(credentials).then(
+    function(token){
+      findDevice(options);
+    },
+    function(err) {
+      console.log('API call completed on promise fail: ', err);
+    }
+  );
 
-    var device = searchDevice(devices, options.deviceName);
-    device.getAttributes(function(err, data) {
-      console.log('Device Name:', data.name);
-      console.log('Device ID', data.id);
-      id = data.id;
-      callback(id);
+  function findDevice(options){
+    spark.listDevices(function(err, devices) {
+      var device = searchDevice(devices, options.deviceName);
+      device.getAttributes(function(err, data) {
+        console.log('Device Name:', data.name);
+        console.log('Device ID', data.id);
+        id = data.id;
+        callback(id);
+      });
     });
-  });
+  }
 };
 
 function searchDevice(devices, deviceName){
