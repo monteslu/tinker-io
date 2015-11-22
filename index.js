@@ -41,40 +41,37 @@ var pins = [
 
 function TinkerIO(options) {
 
-  // call super constructor
-  // BoardIO.call(this);
-
   var self = this;
   self.MODES = modes;
   self.LOW = 0;
   self.HIGH = 1;
   self.options = options || {};
 
+  this.pins = pins.map(function(pin) {
+    return {
+      name: pin.id,
+      supportedModes: pin.modes,
+      mode: pin.modes[0],
+      value: 0
+    };
+  });
+
+  self.analogPins = this.pins.slice(10).map(function(pin, i) {
+    return i;
+  });
+
   if (options.deviceName && options.token){
-     setupSpark(options, function(data){
-       id = data;
-       setImmediate();
-     });
-   }
-
-    this.pins = pins.map(function(pin) {
-      return {
-        name: pin.id,
-        supportedModes: pin.modes,
-        mode: pin.modes[0],
-        value: 0
-      };
+    setupSpark(options, function(data){
+      id = data;
+      setImmediate();
     });
+  }
 
-    self.analogPins = this.pins.slice(10).map(function(pin, i) {
-      return i;
-    });
-
-    function setImmediate() {
-      self.emit("connect");
-      self.isReady = true;
-      self.emit("ready");
-    }
+  function setImmediate() {
+    self.emit("connect");
+    self.isReady = true;
+    self.emit("ready");
+  }
 
 };
 
