@@ -1,6 +1,6 @@
 {
   "name": "tinker-io",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "simple tinker based IO class for the particle cloud ",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,6 @@
   "homepage": "https://github.com/monteslu/tinker-io#readme",
   "dependencies": {
     "board-io": "^3.0.4",
-    "rest": "^1.3.1",
     "spark": "^1.0.0"
   }
 }
