@@ -4,7 +4,7 @@ Tinker-io is a Firmata-compatibility IO class for writing node programs that int
 
 ### Caveat
 
-This is a very simplified IO class.  It is meant to be used over the particle cloud using the default Tinker sketch that ships on the device. 
+This is a very simplified IO class.  It is meant to be used over the particle cloud using the default Tinker sketch that ships on the device.
 
 For a full-featured IO class you should be using [particle-io](https://github.com/rwaldron/particle-io)
 
@@ -23,7 +23,10 @@ The "Hello World" of microcontroller programming:
 var TinkerIO = require("tinker-io");
 var board = new TinkerIO({
   token: YOUR_PARTICLE_TOKEN,
-  deviceId: YOUR_PARTICLE_DEVICE_ID
+//  optional - you can use your username/password instead of token  
+//  username: YOUR_PARTICLE_USERNAME_EMAIL,
+//  password: YOUR_PARTICLE_PASSWORD,
+  deviceName: YOUR_DEVICE_NAME
 });
 
 board.on("ready", function() {

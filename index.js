@@ -53,12 +53,9 @@ function TinkerIO(options) {
   if (options.deviceName && options.token){
      setupSpark(options, function(data){
        id = data;
+       setImmediate();
      });
    }
-
-  process.nextTick(function(){
-    self.emit("connected", id);
-  });
 
     this.pins = pins.map(function(pin) {
       return {
@@ -73,19 +70,23 @@ function TinkerIO(options) {
       return i;
     });
 
-      // all done, emit ready event
-      process.nextTick(function(){
-        self.emit("ready");
-      });
-
-     self.isReady = true;
+    function setImmediate() {
+      self.emit("connect");
+      self.isReady = true;
+      self.emit("ready");
+    }
 
 };
 
 util.inherits(TinkerIO, BoardIO);
 
 function setupSpark(options, callback){
-  spark.login({accessToken: options.token});
+
+  if (options.username){
+    spark.login({username: options.username, password: options.password});
+  }else if(options.token){
+    spark.login({accessToken: options.token});
+  }
 
   spark.listDevices(function(err, devices) {
 
