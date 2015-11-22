@@ -70,6 +70,12 @@ board.on("ready", function() {
   var led = new five.Led("D7");
   led.blink();
 
+  var sensor = new five.Sensor("A0");
+
+  // When the sensor value changes, log the value
+  sensor.on("change", function() {
+    console.log(this.value);
+  });
 
 });
 ```

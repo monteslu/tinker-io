@@ -222,7 +222,6 @@ TinkerIO.prototype.analogWrite = function(pin, value) {
 
 TinkerIO.prototype.analogRead = function(pin, callback) {
 
-
   setInterval(function(){
     spark.callFunction(id, 'analogread', pin, function(err, data) {
       if (err) {
@@ -246,7 +245,6 @@ TinkerIO.prototype.digitalRead = function(pin, callback) {
       }
     });
   }, readInterval);
-
 };
 
 
