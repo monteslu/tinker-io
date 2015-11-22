@@ -7,6 +7,7 @@ var spark = require('spark');
 var priv = new Map();
 
 var id;
+var readInterval;
 
 var modes = {
   INPUT: 0,
@@ -46,6 +47,8 @@ function TinkerIO(options) {
   self.LOW = 0;
   self.HIGH = 1;
   self.options = options || {};
+
+  readInterval = options.interval || 20;
 
   this.pins = pins.map(function(pin) {
     return {
@@ -219,26 +222,30 @@ TinkerIO.prototype.analogWrite = function(pin, value) {
 
 TinkerIO.prototype.analogRead = function(pin, callback) {
 
-  spark.callFunction(id, 'analogread', pin, function(err, data) {
-    if (err) {
-      console.log('An error occurred:', err);
-    }else {
-      callback(data.return_value);
-    }
-  });
+
+  setInterval(function(){
+    spark.callFunction(id, 'analogread', pin, function(err, data) {
+      if (err) {
+        console.log('An error occurred:', err);
+      }else {
+        callback(data.return_value);
+      }
+    });
+  }, readInterval);
 
 };
 
 TinkerIO.prototype.digitalRead = function(pin, callback) {
 
-
-  spark.callFunction(id, 'digitalread', pin, function(err, data) {
-    if (err) {
-      console.log('An error occurred:', err);
-    }else {
-      callback(data.return_value);
-    }
-  });
+  setInterval(function(){
+    spark.callFunction(id, 'digitalread', pin, function(err, data) {
+      if (err) {
+        console.log('An error occurred:', err);
+      }else {
+        callback(data.return_value);
+      }
+    });
+  }, readInterval);
 
 };
 
