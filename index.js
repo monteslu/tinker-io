@@ -247,7 +247,21 @@ TinkerIO.prototype.digitalRead = function(pin, callback) {
   }, readInterval);
 };
 
+TinkerIO.prototype.callApi = function(endpoint, value, callback) {
+  spark.callFunction(id, endpoint, value, function(err, data) {
+    if (err) {
+      console.log('An error occurred:', err);
+    }else {
+      callback(data.return_value);
+    }
+  });
+};
 
+TinkerIO.prototype.getEventStream = function(eventname,callback) {
+  spark.getEventStream(eventname, id, function(data) {
+    callback(JSON.stringify(data));
+  });
+};
 
 
 module.exports = TinkerIO;

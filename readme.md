@@ -79,3 +79,40 @@ board.on("ready", function() {
 
 });
 ```
+
+### Custom Endpoints and Event Subscription
+
+You can call custom endpoints and subscribe to event streams created via the [Particle Api](https://docs.particle.io/reference/firmware/photon/#cloud-functions) added to the Tinker sketch and still use johnny-five apis:
+
+```js
+var five = require("johnny-five");
+var TinkerIO = require("tinker-io");
+var boardIO = new TinkerIO({
+  token: YOUR_PARTICLE_TOKEN,
+//  optional - you can use your username/password instead of token  
+//  username: YOUR_PARTICLE_USERNAME_EMAIL,
+//  password: YOUR_PARTICLE_PASSWORD,
+  deviceName: YOUR_DEVICE_NAME
+});
+
+var board = new five.Board({
+  io: boardIO
+});
+
+board.on("ready", function() {
+
+  var button = new five.Button("D4"); // button on pin 4
+
+  button.on("down", function() {
+      console.log("down");
+      // call api
+      boardIO.callApi("endpoint", "some_command", function(result) {
+        console.log(result);
+      });
+    });
+
+  boardIO.getEventStream('event_name', function(data){
+    console.log(data);
+  });
+});
+```
