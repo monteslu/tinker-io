@@ -1,6 +1,6 @@
 {
   "name": "tinker-io",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "simple tinker based IO class for the particle cloud ",
   "main": "index.js",
   "scripts": {
