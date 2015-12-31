@@ -1,6 +1,6 @@
 {
   "name": "tinker-io",
-  "version": "2.0.0",
+  "version": "2.0.3",
   "description": "simple tinker based IO class for the particle cloud ",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,12 @@
     "photon"
   ],
   "author": "Luis Montes",
+  "contributors": [
+    {
+      "name": "Moheeb Zara",
+      "email": "<moheeb@heatsynclabs.org>"
+    }
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/monteslu/tinker-io/issues"
